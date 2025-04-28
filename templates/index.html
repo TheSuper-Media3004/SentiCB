@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SentimentChain - Blockchain-Powered Sentiment Analysis</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Using Feather Icons via JS below -->
+
+  <!-- Custom CSS (local) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script> <!-- Feather Icons JS -->
+
+  <!-- Custom JS (local) -->
+  <!-- Defer ensures scripts run after HTML is parsed -->
+  <script src="{{ url_for('static', filename='js/charts.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/blockchain.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo">SC</div>
+                <h1>SentimentChain</h1>
+            </div>
+            <div class="header-actions">
+                <button id="connectWallet" class="wallet-btn">Connect Wallet</button>
+                <button id="themeToggle">🌙</button>
+            </div>
+        </header>
+
+        <div class="l1x-banner">
+            <div class="l1x-info">
+                <div class="l1x-logo">L1X</div>
+                <div class="l1x-text">
+                    <h3>Powered by L1X Blockchain</h3>
+                    <p>Store, verify and trade sentiment analysis data on L1X blockchain</p>
+                </div>
+            </div>
+            <!-- Removed hackathon badge as it wasn't in the original CSS provided -->
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="analyze">Analyze</button>
+            <button class="tab-btn" data-tab="history">History</button>
+            <button class="tab-btn" data-tab="marketplace">Marketplace</button>
+            <button class="tab-btn" data-tab="about">About L1X</button>
+        </div>
+
+        <!-- Analyze Tab -->
+        <div class="tab-content" id="analyze-tab">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="fileInput">Upload File (CSV/TXT)</label>
+                    <input type="file" id="fileInput" accept=".csv,.txt">
+                </div>
+                <div class="input-group">
+                    <label for="keywordInput">Filter Keyword (Optional)</label>
+                    <input type="text" id="keywordInput" placeholder="e.g., crypto, L1X, blockchain">
+                </div>
+                <div class="input-group">
+                    <label for="urlInput">Fetch from Web URL</label>
+                    <input type="url" id="urlInput" placeholder="https://example.com/article">
+                </div>
+            </div>
+
+            <div class="text-input-container">
+                <label for="textInput">Or Paste Text Directly</label>
+                <textarea id="textInput" placeholder="Type or paste your text here for sentiment analysis..."></textarea>
+            </div>
+
+            <div class="analysis-options">
+                <div class="model-selection">
+                    <label for="modelSelect">Analysis Model:</label>
+                    <select id="modelSelect">
+                        <option value="basic">Basic (Fast)</option>
+                        <option value="advanced">Advanced (Simulated)</option>
+                        <option value="blockchain">Consensus (Simulated)</option>
+                    </select>
+                </div>
+                <button id="analyzeBtn" class="glow-button">Analyze</button>
+            </div>
+
+            <div class="results-container hidden" id="resultsContainer">
+                <h2>Analysis Results</h2>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h4>Overall Sentiment</h4>
+                        <div class="sentiment-indicator" id="overallSentiment">Neutral</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Confidence Score</h4>
+                        <div class="confidence-score" id="confidenceScore">0%</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Analysis Time</h4>
+                        <div class="analysis-time" id="analysisTime">0ms</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Sentiment Distribution</h3>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Sentiment Proportions</h3>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                    <!-- Removed Line and Radar charts as they weren't fully implemented in provided JS -->
+                    <!-- Add them back if charts.js supports them -->
+                </div>
+            </div>
+
+            <div class="blockchain-verification">
+                <h3>L1X Blockchain Verification</h3>
+                <p>Store your analysis results immutably on the L1X blockchain for future reference, verification, and potential monetization.</p>
+                <div class="blockchain-benefits">
+                    <div class="benefit">
+                        <i data-feather="lock"></i>
+                        <span>Immutable Records</span>
+                    </div>
+                    <div class="benefit">
+                        <i data-feather="check-circle"></i>
+                        <span>Verifiable Results</span>
+                    </div>
+                    <div class="benefit">
+                        <i data-feather="dollar-sign"></i>
+                        <span>Monetize Data</span>
+                    </div>
+                </div>
+                <button id="storeOnChain" class="blockchain-btn" disabled>Store on L1X Blockchain</button>
+                <div class="transaction-info" id="transactionInfo"></div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content hidden" id="history-tab">
+            <h2>Analysis History</h2>
+            <div class="history-filters">
+                <input type="text" id="historySearch" placeholder="Search history by text...">
+                <select id="historyFilter">
+                    <option value="all">All Analyses</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="blockchain">On Blockchain</option>
+                </select>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- History items loaded by script.js -->
+                <div class="empty-state">
+                    <i data-feather="inbox"></i>
+                    <p>No analysis history yet. Perform an analysis to see it here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marketplace Tab -->
+        <div class="tab-content hidden" id="marketplace-tab">
+            <h2>L1X Sentiment Data Marketplace</h2>
+            <p class="marketplace-intro">Buy or sell anonymized sentiment analysis datasets using L1X tokens. All transactions are secured by blockchain technology.</p>
+
+            <div class="marketplace-categories">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="finance">Finance</button>
+                <button class="category-btn" data-category="crypto">Crypto</button>
+                <button class="category-btn" data-category="product">Product Reviews</button>
+                <button class="category-btn" data-category="social">Social Media</button>
+                <button class="category-btn" data-category="news">News</button>
+            </div>
+
+            <div class="marketplace-items" id="marketplaceItems">
+                <!-- Marketplace items loaded by script.js -->
+                 <div class="empty-state">
+                    <i data-feather="shopping-cart"></i>
+                    <p>Marketplace items will appear here.</p>
+                </div>
+            </div>
+
+            <div class="marketplace-actions">
+                <button id="listDataBtn" class="market-action-btn" disabled>List Current Analysis Data</button>
+                <div class="market-info">
+                    <i data-feather="info"></i>
+                    <p>Connect wallet and perform analysis to list data</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Tab -->
+        <div class="tab-content hidden" id="about-tab">
+            <div class="about-l1x">
+                <h2>What is L1X?</h2>
+                <p>L1X is presented here as a conceptual next-generation Layer 1 blockchain combining AI and crypto for secure, scalable Web3 applications.</p>
+
+                <div class="l1x-features">
+                    <div class="feature-card">
+                        <i data-feather="shield"></i>
+                        <h3>AI-Driven Security</h3>
+                        <p>Conceptual use of AI for smart contract auditing and fraud detection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-feather="trending-up"></i>
+                        <h3>DeFi & Trading</h3>
+                        <p>Conceptual AI-powered trading strategies and market prediction.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-feather="users"></i>
+                        <h3>Enhanced Governance</h3>
+                        <p>Conceptual intelligent DAO voting and governance proposals.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-feather="eye"></i>
+                        <h3>Privacy & Identity</h3>
+                        <p>Conceptual secure decentralized identity with AI verification.</p>
+                    </div>
+                </div>
+                 <!-- Removed sections not fully styled or implemented in provided code -->
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>SentimentChain</h4>
+                    <p>L1X blockchain-powered sentiment analysis demo.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">Documentation (Demo)</a></li>
+                        <li><a href="#">API (Demo)</a></li>
+                        <li><a href="#">Pricing (Demo)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Twitter"><i data-feather="twitter"></i></a>
+                        <a href="#" class="social-link" title="GitHub"><i data-feather="github"></i></a>
+                        <a href="#" class="social-link" title="Discord"><i data-feather="message-square"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 SentimentChain Demo on L1X Concept. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Chatbot Button and Widget -->
+    <div id="chatbot-button" title="Chat about current analysis">
+         <!-- Simple inline SVG chat icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+    </div>
+
+    <div id="chatbot-widget" style="display: none;">
+        <div id="chatbot-header">
+            <span>AI Assistant</span>
+            <button id="chatbot-close-button" title="Close chat">&times;</button>
+        </div>
+        <div id="chatbot-messages">
+            <!-- Initial message added by script -->
+        </div>
+        <div id="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="Ask about the analysis...">
+            <button id="chatbot-send-button" title="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+        <div id="chatbot-disclaimer">AI responses may be inaccurate. Based on current analysis context.</div>
+    </div>
+
+</body>
+</html>

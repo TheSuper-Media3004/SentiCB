@@ -1,0 +1,8 @@
+flask
+transformers
+torch
+google-generativeai
+python-dotenv
+pandas
+beautifulsoup4
+requests
